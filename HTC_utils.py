@@ -131,8 +131,8 @@ def run_htc_single(W, x0, y0, T, r1, r2,
     return x, y
 
 def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2, 
-                       N=None, runs=50, nperseg=1000, Tdiv_log = False,
-                       nT=40, eq_steps=int(1e3), display=False):
+                       N=None, runs=50, nperseg=1000, Tdiv_log=False,
+                       nT=40, eq_steps=int(1e3), display=False, hist=True):
     
     start = time.time()
     
@@ -156,7 +156,9 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
         Trange = np.logspace(np.log10(Tmin), np.log10(Tmax), nT, endpoint=True)
     else:
         Trange = np.linspace(Tmin, Tmax, nT, endpoint=True)
-    Trange = np.concatenate((Trange, Trange[:-1][::-1]))
+        
+    if hist:
+        Trange = np.concatenate((Trange, Trange[:-1][::-1]))
     
     ### Initialize empty arrays
     A, sigmaA, errA = np.zeros(len(Trange)), np.zeros(len(Trange)), np.zeros(len(Trange))
@@ -173,7 +175,10 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
         Aij = np.zeros((runs, steps, N))
         
         # Init activity only at the beginning
-        if i==0:
+        if hist==True:
+            if i==0:
+                S = init_state(N, xplus, yplus, runs)
+        else:
             S = init_state(N, xplus, yplus, runs)
         
         # LOOP OVER TIME STEPS
