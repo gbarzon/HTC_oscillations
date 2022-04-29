@@ -5,7 +5,7 @@ import os
 
 from scipy.stats import truncnorm
 from scipy import signal
-#from statsmodels.tsa.stattools import acf
+from statsmodels.tsa.stattools import acf
 
 from tqdm.auto import tqdm
 from IPython.display import clear_output
@@ -163,6 +163,7 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
     ### Initialize empty arrays
     A, sigmaA, errA = np.zeros(len(Trange)), np.zeros(len(Trange)), np.zeros(len(Trange))
     spectra, sigma_spectra = [], [] 
+    acorr = []
     
     # LOOP OVER Ts
     for i,T in enumerate(Trange):
@@ -208,7 +209,6 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
         At = np.mean(Aij, axis=2)    # node average <A(t)>
         A[i], sigmaA[i], errA[i] = np.mean(At), np.mean( np.std(At, axis=1) ), np.sqrt( np.mean( np.std(At, axis=1)**2 ) )
         
-        '''
         # AUTOCORRELATION
         print('Computing autocorrelation...')
         tmp_acorr = []
@@ -219,7 +219,6 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
         tmp_acorr = np.stack(tmp_acorr, axis=0) # from list to array
         tmp_acorr = np.mean(tmp_acorr, axis=0) # average over runs
         acorr.append(tmp_acorr)
-        '''
         
         '''
         # POWER SPECTRUM
@@ -241,7 +240,7 @@ def run_htc_hysteresis(W, dt, steps, Tmin, Tmax, r1, r2,
     print('Total computation time: {:.2f}s'.format(time.time()-start))
     
     #return (Trange, A, sigmaA, np.stack(acorr, axis=0), f, np.stack(spectra, axis=0))
-    return (Trange, A, sigmaA, errA)
+    return (Trange, A, sigmaA, acorr)
 
 
 def save_results(name, results):
